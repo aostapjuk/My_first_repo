@@ -4,7 +4,11 @@ win_width = 600
 win_height = 500
 
 def main():
+    global win
+    win = GraphWin('Picture graphics', win_width, win_height)
     draw_house(win_width//3, win_height*2//3, 150, 200)
+    cursor_point = win.getMouse()
+    win.close()
 
 def draw_house(x0, y0, width, height):
     ''' Функция рисует дом в положении  на холсте.
@@ -26,10 +30,18 @@ def draw_house(x0, y0, width, height):
     draw_roof(x0, y0-walls_height, width, roof_height)
 
 def draw_foundation(x0, y0, width, height):
-    pass
+    foundation = Rectangle(Point(x0-width//2, y0-height), Point(x0+width//2, y0))
+    foundation.setWidth(3)
+    foundation.setFill('brown')
+    foundation.draw(win)
+    print('foundation', x0, y0, width, height)
 
 def draw_walls(x0, y0, width, height):
-    pass
+    walls = Rectangle(Point(x0-width//2, y0-height), Point(x0+width//2, y0))
+    walls.setWidth(3)
+    walls.setFill('brown')
+    walls.draw(win)
+    print('walls', x0, y0, width, height)
 
 def draw_window(x0, y0, width, height):
     pass
