@@ -39,12 +39,16 @@ def draw_foundation(x0, y0, width, height):
 def draw_walls(x0, y0, width, height):
     walls = Rectangle(Point(x0-width//2, y0-height), Point(x0+width//2, y0))
     walls.setWidth(3)
-    walls.setFill('brown')
+    walls.setFill('green')
     walls.draw(win)
     print('walls', x0, y0, width, height)
 
 def draw_window(x0, y0, width, height):
-    pass
+    window = Rectangle(Point(x0-width//2, y0-height), Point(x0+width//2, y0))
+    window.setWidth(3)
+    window.setFill('yellow')
+    window.draw(win)
+    print('walls', x0, y0, width, height)
 
 def draw_roof(x0, y0, width, height):
     pass
