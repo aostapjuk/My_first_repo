@@ -27,7 +27,7 @@ def draw_house(x0, y0, width, height):
                walls_width, walls_height)
     draw_window(x0, y0-foundation_height-walls_height//3,
                 window_height, window_width)
-    draw_roof(x0, y0-walls_height, width, roof_height)
+    draw_roof(x0, y0-foundation_height-walls_height, width, roof_height)
 
 def draw_foundation(x0, y0, width, height):
     foundation = Rectangle(Point(x0-width//2, y0-height), Point(x0+width//2, y0))
@@ -51,6 +51,13 @@ def draw_window(x0, y0, width, height):
     print('walls', x0, y0, width, height)
 
 def draw_roof(x0, y0, width, height):
-    pass
+    coordinates = [(x0-width//2, y0), (x0, y0-height),
+                   (x0+width//2, y0)]
+    points = [Point(x, y) for x, y in coordinates]
+    roof = Polygon(points)
+    roof.setWidth(3)
+    roof.setFill('darkred')
+    roof.draw(win)
+    print('roof', x0, y0, width, height)
 
 main()
