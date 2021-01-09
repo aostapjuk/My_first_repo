@@ -32,7 +32,7 @@ button_stop = Button(buttons_panel, text='Stop', command=delete_ball)
 button_stop.pack(side=LEFT)
 
 c = Canvas(root, width=640, height=400, bg='white')
-c.pack(side=TOP, fill=X, anchor='nw')
+c.pack(fill=BOTH, expand=1)
 c.bind('<Button>', click_handler)
 
 root.mainloop()
