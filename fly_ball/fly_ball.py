@@ -4,41 +4,64 @@ import time
 
 # Режим игры - игра идёт или нет.
 game_began = False
-'''oval_id = None
-x, y, r = 10, 20, 10
-dx, dy = 10, 10'''
+initial_balls_number = 5
 scores = 0
-single_ball = [10, 20, 5, 3, 1, None]
 sleep_time = 50     # ms
+# Список шариков, каждый из которых - список: [x, y, dx, dy, r, oval_id]
+balls = []
 
+
+# -----------------GAME CONTROLLER:-------------------
 def tick():
     time_label.after(sleep_time, tick)
     time_label['text'] = time.strftime('%H:%M:%S')
     if game_began:
-        ball_step(single_ball)
+        game_step()
 
 
 def button_start_game_handler():
     global game_began
     if not game_began:
-        start_game()
+        game_start()
         game_began = True
 
 
 def button_stop_game_handler():
     global game_began
     if game_began:
-        stop_game()
+        game_stop()
         game_began = False
 
 
-def start_game():
-    global single_ball
-    ball_create(single_ball)
+# -----------------GAME MODEL:-------------------
+def game_start():
+    for i in range(initial_balls_number):
+        ball = ball_create()
+        balls.append(ball)
 
 
-def stop_game():
-    ball_delete(single_ball)
+def game_stop():
+    for ball in balls:
+        ball_delete(ball)
+
+
+def game_step():
+    for ball in balls:
+        ball_step(ball)
+
+
+def ball_create():
+    global scores
+    scores = 0
+    scores_text["text"] = "Ваши очки: 0"
+    r = randint(10, 30)
+    x = randint(0 + r, 639 - r)
+    y = randint(0 + r, 479 - r)
+    dx = randint(-4, 4)
+    dy = randint(-4, 4)
+    oval_id = c.create_oval(x-r, y-r, x+r, y+r, fill='red')
+    ball = [x, y, dx, dy, r, oval_id]
+    return ball
 
 
 def ball_step(ball):
@@ -46,7 +69,6 @@ def ball_step(ball):
     Сдвигает шарик ball в соответствии с его скоростью.
     :param ball: это список (x, y, dx, dy, r, oval_id)
     """
-    global x, y, dx, dy, r, oval_id
     x, y, dx, dy, r, oval_id = ball
     if oval_id is not None:
         x += dx
@@ -59,19 +81,6 @@ def ball_step(ball):
     ball[:] = x, y, dx, dy, r, oval_id
 
 
-def ball_create(ball):
-    global scores
-    scores = 0
-    scores_text["text"] = "Ваши очки: 0"
-    x, y, dx, dy, r, oval_id = ball
-    if oval_id is None:
-        r = randint(10, 30)
-        x = randint(0 + r, 639 - r)
-        y = randint(0 + r, 479 - r)
-        oval_id = c.create_oval(x-r, y-r, x+r, y+r, fill='red')
-    ball[:] = x, y, dx, dy, r, oval_id
-
-
 def ball_delete(ball):
     x, y, dx, dy, r, oval_id = ball
     c.delete(oval_id)
@@ -79,6 +88,7 @@ def ball_delete(ball):
     ball[:] = x, y, dx, dy, r, oval_id
 
 
+# -----------------GAME VIEW:-------------------
 root = Tk('Игра "Поймай шарики"')
 root.geometry('640x480')
 
