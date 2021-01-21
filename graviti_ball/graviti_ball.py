@@ -32,6 +32,12 @@ class Game:
             ball.step(self.dt)
         self.t += self.dt
 
+    def click(self, x, y):
+        for i in range(len(self.balls)-1, -1, -1):
+            if self.balls[i].overlap(x, y):
+                self.balls[i].delete()
+                self.balls.pop(i)
+
     def game_over(self):
         for ball in self.balls:
             ball.delete()
@@ -64,6 +70,9 @@ def button_stop_game_handler():
         game.stop()
         game_began = False
 
+def canvas_click_handler(event):
+    if game_began:
+        game.click(event.x, event.y)
 
 class Ball:
     densiti = 1.0
@@ -111,6 +120,9 @@ class Ball:
         Fy = self.m * 9.8
         return Fx, Fy
 
+    def overlap(self, x, y):
+        return (self.x - x) ** 2 + (self.y - y) ** 2 <= self.r ** 2
+
 
 # -----------------GAME VIEW:-------------------
 root = Tk('Игра "Поймай шарики"')
@@ -131,6 +143,7 @@ scores_text.pack(side=RIGHT)
 
 c = Canvas(root, bg='white', width=canvas_width, height=canvas_height)
 c.pack(anchor='nw', fill=BOTH, expand=1)
+c.bind('<Button-1>', canvas_click_handler)
 
 game = Game()
 
