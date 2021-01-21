@@ -1,16 +1,14 @@
+import time
+import math
 from tkinter import *
 from random import randint
-import time
 
 canvas_width = 640
 canvas_height = 480
 # Режим игры - игра идёт или нет.
 game_began = False
-initial_balls_number = 5
 scores = 0
 sleep_time = 50     # ms
-# Список объектов типа Ball
-balls = []
 
 
 # -----------------GAME CONTROLLER:-------------------
@@ -36,6 +34,12 @@ def button_stop_game_handler():
 
 
 # -----------------GAME MODEL:-------------------
+initial_balls_number = 5
+# Список объектов типа Ball
+balls = []
+t = 0
+dt = 0.05  # Квант модельного времени.
+
 def game_start():
     for i in range(initial_balls_number):
         ball = Ball()
@@ -48,42 +52,56 @@ def game_stop():
 
 
 def game_step():
+    global t
     for ball in balls:
         ball.step()
+    t += dt
 
 
 class Ball:
+    densiti = 1.0
     def __init__(self):
         '''global scores
         scores = 0
         scores_text["text"] = "Ваши очки: 0"'''
         self.r = randint(10, 30)
+        self.m = self.densiti * math.pi * self.r ** 2
         self.x = randint(0 + self.r, canvas_width - self.r)
         self.y = randint(0 + self.r, canvas_height - self.r)
-        self.dx = randint(-4, 4)
-        self.dy = randint(-4, 4)
+        self.Vx = randint(-100, 100)
+        self.Vy = randint(-100, 100)
         self.oval_id = c.create_oval(self.x-self.r, self.y-self.r,
                                      self.x+self.r, self.y+self.r,
                                      fill='red')
+
+    def delete(self):
+        c.delete(self.oval_id)
+        self.oval_id = None
 
     def step(self):
         """
         Сдвигает шарик ball в соответствии с его скоростью.
         """
         if self.oval_id is not None:
-            self.x += self.dx
-            self.y += self.dy
+            Fx, Fy = self.force()
+            ax = Fx / self.m
+            ay = Fy / self.m
+            self.x += self.Vx * dt + ax * dt ** 2 / 2
+            self.y += self.Vy * dt + ay * dt ** 2 / 2
+            self.Vx += ax * dt
+            self.Vy += ay * dt
             if self.x+self.r >= canvas_width or self.x-self.r <= 0:
-                self.dx = -self.dx
+                self.Vx = -self.Vx
             if self.y+self.r >= canvas_height or self.y-self.r <= 0:
-                self.dy = -self.dy
+                self.Vy = -self.Vy
             c.coords(self.oval_id,
                      self.x - self.r, self.y - self.r,
                      self.x + self.r, self.y + self.r)
 
-    def delete(self):
-        c.delete(self.oval_id)
-        self.oval_id = None
+    def force(self):
+        Fx = 0
+        Fy = self.m * 9.8
+        return Fx, Fy
 
 
 # -----------------GAME VIEW:-------------------
