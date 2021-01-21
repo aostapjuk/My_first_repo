@@ -5,61 +5,69 @@ from random import randint
 
 canvas_width = 640
 canvas_height = 480
+
+
+# -----------------GAME MODEL:-------------------
+class Game:
+
+    def __init__(self, initial_balls_number = 5):
+        self.initial_balls_number = initial_balls_number
+        # Список объектов типа Ball
+        self.balls = []
+        self.t = 0
+        self.dt = 0.05  # Квант модельного времени.
+        self.paused = True
+        for i in range(initial_balls_number):
+            ball = Ball()
+            self.balls.append(ball)
+
+    def start(self):
+        self.paused = False
+
+    def stop(self):
+        self.paused = True
+
+    def step(self):
+        for ball in self.balls:
+            ball.step(self.dt)
+        self.t += self.dt
+
+    def game_over(self):
+        for ball in self.balls:
+            ball.delete()
+        print('Конец игры!')
+
+
+# -----------------GAME CONTROLLER:-------------------
 # Режим игры - игра идёт или нет.
 game_began = False
 scores = 0
 sleep_time = 50     # ms
 
-
-# -----------------GAME CONTROLLER:-------------------
 def tick():
     time_label.after(sleep_time, tick)
     time_label['text'] = time.strftime('%H:%M:%S')
     if game_began:
-        game_step()
+        game.step()
 
 
 def button_start_game_handler():
     global game_began
     if not game_began:
-        game_start()
+        game.start()
         game_began = True
 
 
 def button_stop_game_handler():
     global game_began
     if game_began:
-        game_stop()
+        game.stop()
         game_began = False
-
-
-# -----------------GAME MODEL:-------------------
-initial_balls_number = 5
-# Список объектов типа Ball
-balls = []
-t = 0
-dt = 0.05  # Квант модельного времени.
-
-def game_start():
-    for i in range(initial_balls_number):
-        ball = Ball()
-        balls.append(ball)
-
-
-def game_stop():
-    for ball in balls:
-        ball.delete()
-
-
-def game_step():
-    global t
-    for ball in balls:
-        ball.step()
-    t += dt
 
 
 class Ball:
     densiti = 1.0
+
     def __init__(self):
         '''global scores
         scores = 0
@@ -78,7 +86,7 @@ class Ball:
         c.delete(self.oval_id)
         self.oval_id = None
 
-    def step(self):
+    def step(self, dt):
         """
         Сдвигает шарик ball в соответствии с его скоростью.
         """
@@ -123,6 +131,8 @@ scores_text.pack(side=RIGHT)
 
 c = Canvas(root, bg='white', width=canvas_width, height=canvas_height)
 c.pack(anchor='nw', fill=BOTH, expand=1)
+
+game = Game()
 
 time_label.after_idle(tick)
 root.mainloop()
