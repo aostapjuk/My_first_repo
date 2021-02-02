@@ -15,6 +15,7 @@ class Game:
         self.initial_balls_number = initial_balls_number
         # Список объектов типа Ball
         self.balls = []
+        self.tank = Tank(canvas_width//2, canvas_height, 'green')
         self.t = 0
         self.dt = 0.05  # Квант модельного времени.
         self.paused = True
@@ -40,16 +41,79 @@ class Game:
         self.t += self.dt
 
     def click(self, x, y):
+        # TODO: поменять логику клика - теперь это должен быть выстрел танка (откуда брать энергию?).
         for i in range(len(self.balls)-1, -1, -1):
             if self.balls[i].overlap(x, y):
                 self.balls[i].delete()
                 self.balls.pop(i)
 
+    def mouse_motion(self, x, y):
+        '''
+        При движении мышкой вызываем для танка (пока единственного) его алгоритм прицеливания.
+        '''
+        self.tank.aim(x, y)
+
     def game_over(self):
         for ball in self.balls:
             ball.delete()
+        self.tank.delete()
         print('Конец игры!')
 
+
+class Tank:
+    '''
+    Танк, который умеет прицеливается в задонную точку и порождает снаряды.
+    '''
+    gun_length = 30
+    turret_radius = 15
+
+    def __init__(self, x, y, color):
+        '''
+        x, y - центр турели;
+        d - вектор ствола танка;
+        '''
+        self.x = x
+        self.y = y
+        self.dx = 0
+        self.dy = -1
+        self.turret_avatar = c.create_arc(self.x - self.turret_radius, self.y - self.turret_radius,
+                                          self.x + self.turret_radius, self.y + self.turret_radius, start=0.,
+                                          extent=180, fill=color)
+        x1, y1, x2, y2 = self._gun_xy()
+        self.gun_avatar = c.create_line(x1, y1, x2, y2, width=5, fill=color)
+        # TODO: закончить конструктор, продумать все свойства.
+
+    def _gun_xy(self):
+        '''
+        :return: (x1, y1, x2, y2) экранные координаты начала и конца ствола пушки
+        '''
+        x1 = self.x + self.dx * self.turret_radius
+        y1 = self.y + self.dy * self.turret_radius
+        x2 = self.x + self.dx * self.gun_length
+        y2 = self.y + self.dy * self.gun_length
+        return x1, y1, x2, y2
+
+    def aim(self, x, y):
+        '''
+        Прицеливание ствола в сторону точки (x, y)
+        '''
+        r = ((x - self.x) ** 2 + (y - self.y) ** 2) ** 0.5
+        self.dx = (x - self.x) / r
+        self.dy = (y - self.y) / r
+        x1, y1, x2, y2 = self._gun_xy()
+        c.coords(self.gun_avatar, x1, y1, x2, y2)
+
+    def fire(self, energy):
+        '''
+        Стреляет снарядом, порождая новый объект типа "летящий снаряд".
+        :param energy: Энергия выстрела - положительное дробное число.
+        :return: Снаряд, который будет поражать цели.
+        '''
+        pass  # TODO: пока снаряд не порождается.
+        print('Типа выстрелили!')
+
+    def delete(self):
+        pass    # TODO: корректно удалить аватары танка с холста.
 
 # -----------------GAME CONTROLLER:-------------------
 # Режим игры - игра идёт или нет.
@@ -80,6 +144,12 @@ def button_stop_game_handler():
 def canvas_click_handler(event):
     if game_began:
         game.click(event.x, event.y)
+
+
+def canvas_mouse_motion_handler(event):
+    if game_began:
+        game.mouse_motion(event.x, event.y)
+
 
 class Ball:
     densiti = 1.0
@@ -164,6 +234,8 @@ scores_text.pack(side=RIGHT)
 c = Canvas(root, bg='white', width=canvas_width, height=canvas_height)
 c.pack(anchor='nw', fill=BOTH, expand=1)
 c.bind('<Button-1>', canvas_click_handler)
+c.bind('<Motion>', canvas_mouse_motion_handler)
+
 
 game = Game(default_initial_balls_number)
 
